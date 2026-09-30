@@ -1,0 +1,109 @@
+# Sharded Orders Demo (standalone teaching sample; self-contained, NOT the root compose file).
+# 4 real Postgres shards, always up. A 5th sits behind the `shard5` profile — it stays DOWN
+# until the live "add a shard" step:
+#
+#   docker compose -f docker-compose.yml up -d
+#   docker compose -f docker-compose.yml --profile shard5 up -d shard-db-5
+#
+# Ports start at 5501 — clear of the root repo's own compose file (5432-5436, 6379, 9092, 8090, 6432).
+
+services:
+  shard-db-1:
+    image: postgres:16
+    container_name: tadka-shard1-db
+    ports:
+      - "5501:5432"
+    environment:
+      POSTGRES_USER: ${SHARD_DB_USER:-tadka}
+      POSTGRES_PASSWORD: ${SHARD_DB_PASSWORD:-tadka_local}
+      POSTGRES_DB: ${SHARD1_DB:-tadka_shard1}
+    volumes:
+      - shard1_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SHARD_DB_USER:-tadka}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  shard-db-2:
+    image: postgres:16
+    container_name: tadka-shard2-db
+    ports:
+      - "5502:5432"
+    environment:
+      POSTGRES_USER: ${SHARD_DB_USER:-tadka}
+      POSTGRES_PASSWORD: ${SHARD_DB_PASSWORD:-tadka_local}
+      POSTGRES_DB: ${SHARD2_DB:-tadka_shard2}
+    volumes:
+      - shard2_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SHARD_DB_USER:-tadka}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  shard-db-3:
+    image: postgres:16
+    container_name: tadka-shard3-db
+    ports:
+      - "5503:5432"
+    environment:
+      POSTGRES_USER: ${SHARD_DB_USER:-tadka}
+      POSTGRES_PASSWORD: ${SHARD_DB_PASSWORD:-tadka_local}
+      POSTGRES_DB: ${SHARD3_DB:-tadka_shard3}
+    volumes:
+      - shard3_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SHARD_DB_USER:-tadka}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  shard-db-4:
+    image: postgres:16
+    container_name: tadka-shard4-db
+    ports:
+      - "5504:5432"
+    environment:
+      POSTGRES_USER: ${SHARD_DB_USER:-tadka}
+      POSTGRES_PASSWORD: ${SHARD_DB_PASSWORD:-tadka_local}
+      POSTGRES_DB: ${SHARD4_DB:-tadka_shard4}
+    volumes:
+      - shard4_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SHARD_DB_USER:-tadka}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # The 5th shard — deliberately down by default. Bring it up live during the "add a
+  # shard" step (Act 1 of the README's walkthrough) to feel the resize happen for real.
+  shard-db-5:
+    image: postgres:16
+    container_name: tadka-shard5-db
+    profiles: ["shard5"]
+    ports:
+      - "5505:5432"
+    environment:
+      POSTGRES_USER: ${SHARD_DB_USER:-tadka}
+      POSTGRES_PASSWORD: ${SHARD_DB_PASSWORD:-tadka_local}
+      POSTGRES_DB: ${SHARD5_DB:-tadka_shard5}
+    volumes:
+      - shard5_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SHARD_DB_USER:-tadka}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  shard1_data:
+  shard2_data:
+  shard3_data:
+  shard4_data:
+  shard5_data:

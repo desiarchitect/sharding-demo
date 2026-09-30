@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    STANDALONE teaching sample. Deliberately NOT part of Tadka.slnx, references
+    nothing in src/, never touched by dotnet test.
+
+    Unlike samples/sharding-demo (a pure in-memory hash simulation), this one
+    drives REAL Postgres shards via Docker: real INSERT routing, a real
+    cross-shard scatter-gather query, and a real "add a shard, watch a lookup
+    break, then migrate the data to fix it" sequence.
+
+    See README.md for exact run instructions and the full command list.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Tadka.Samples.ShardedOrdersDemo</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="10.0.3" />
+  </ItemGroup>
+</Project>
